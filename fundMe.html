@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Crypto Transfer</title>
+    <link rel="stylesheet" href="./fundMe.css">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+
+</head>
+
+<body>
+    <div class="container">
+        <h1>Crypto Transfer Demo</h1>
+        <div id="accountStatus"></div>
+
+        <div class="flex">
+            <button id="connectButton" onclick="connect()">Connect</button>
+            <button id="disconnectButton" onclick="disconnect()" style="display: none;">Disconnect</button>
+            <p><span id="ownerAddress"></span></p>
+        </div>
+        <h2>Send Asset</h2>
+        <label for="recipientAddress">Recipient Address:</label>
+        <input type="text" id="recipientAddress"><br>
+        <label for="amount">Amount (ETH):</label>
+        <input type="number" id="amount"><br>
+        <button onclick="sendAsset()">Send Asset</button>
+
+
+    </div>
+
+    <script>
+        let isConnected = false;
+
+        async function connect() {
+            if (typeof web3 === 'undefined') {
+                return alert("Please install MetaMask or a compatible Ethereum wallet extension.");
+            }
+
+            try {
+                const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+                const connectedAccount = accounts[0];
+                document.getElementById('ownerAddress').textContent = connectedAccount;
+                document.getElementById('accountStatus').textContent = "Connected";
+                document.getElementById('connectButton').style.display = "none";
+                document.getElementById('disconnectButton').style.display = "block";
+                isConnected = true;
+            } catch (error) {
+                alert("Error connecting: " + error.message);
+            }
+        }
+
+        function disconnect() {
+            document.getElementById('ownerAddress').textContent = '';
+            document.getElementById('accountStatus').textContent = "Disconnected";
+            document.getElementById('connectButton').style.display = "block";
+            document.getElementById('disconnectButton').style.display = "none";
+            isConnected = false;
+        }
+
+        async function sendAsset() {
+            if (!isConnected) {
+                return alert("Please connect to an Ethereum account first.");
+            }
+
+            const recipientAddress = document.getElementById("recipientAddress").value;
+            const amount = document.getElementById("amount").value;
+
+            if (!recipientAddress || !amount) {
+                return alert("Please enter recipient address and amount.");
+            }
+
+            const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
+            const senderAddress = accounts[0];
+            const contractAddress = '';  // input your contract address
+            const contractABI = contractABI // input your abi
+
+            const web3Instance = new Web3(web3.currentProvider);
+            const contract = new web3Instance.eth.Contract(contractABI, contractAddress);
+
+            try {
+                await contract.methods.sendAsset(recipientAddress).send({ from: senderAddress, value: web3Instance.utils.toWei(amount, 'ether') });
+                alert(`Asset sent successfully to ${recipientAddress}`);
+            } catch (error) {
+                alert("Error sending asset: " + error.message);
+            }
+        }
+
+
+
+    </script>
+</body>
+
+</html>
